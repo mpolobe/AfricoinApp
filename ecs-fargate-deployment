@@ -1,0 +1,208 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Deploys an ECS Fargate Service using an existing Task Definition and ECR Image, 
+  setting up a public Application Load Balancer and necessary networking components.
+
+# ==============================================================================
+# PARAMETERS
+# User inputs required for the template to run.
+# ==============================================================================
+Parameters:
+  # The Task Definition Family Name you already created (e.g., default-my-react-app-repo-8a79)
+  TaskDefinitionFamily:
+    Type: String
+    Description: The family name of the existing ECS Task Definition (e.g., default-my-react-app-repo-8a79).
+    Default: default-my-react-app-repo-8a79
+
+  # The specific revision number you want to deploy (currently '1')
+  TaskDefinitionRevision:
+    Type: String
+    Description: The specific revision number of the Task Definition (e.g., 1).
+    Default: '1'
+
+  # The name for the new ECS Cluster
+  ClusterName:
+    Type: String
+    Description: Name for the new ECS Cluster.
+    Default: MyReactAppCluster
+
+# ==============================================================================
+# RESOURCES
+# The actual AWS resources to be created.
+# ==============================================================================
+Resources:
+
+  # ----------------------------------------------------------------------------
+  # 1. ECS Cluster
+  # ----------------------------------------------------------------------------
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref ClusterName
+
+  # ----------------------------------------------------------------------------
+  # 2. Networking (VPC, Subnets, Security Group)
+  #    We assume the default VPC and subnets are suitable and publicly accessible.
+  #    The Security Group creation is mandatory to allow public access.
+  # ----------------------------------------------------------------------------
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-VPC
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-IGW
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-PublicSubnet
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  # Security Group for the Load Balancer (allows HTTP from the internet)
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: Security group for the Load Balancer
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-ALB-SG
+
+  # Security Group for the ECS Fargate Tasks (allows traffic only from the Load Balancer)
+  FargateTaskSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: Security group for the Fargate Task ENIs
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !GetAtt LoadBalancerSecurityGroup.GroupId # Allow traffic only from the ALB
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Fargate-SG
+
+  # ----------------------------------------------------------------------------
+  # 3. Application Load Balancer (ALB) and Listeners
+  # ----------------------------------------------------------------------------
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      Subnets:
+        - !Ref PublicSubnet
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-ALB
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref VPC
+      Port: 80 # Target port on the container
+      Protocol: HTTP
+      HealthCheckPath: /
+      TargetType: ip
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-TargetGroup
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+  # ----------------------------------------------------------------------------
+  # 4. ECS Service
+  # ----------------------------------------------------------------------------
+  ECSService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub ${AWS::StackName}-Service
+      Cluster: !Ref ECSCluster
+      LaunchType: FARGATE
+      # Reference the Task Definition using the Parameter values
+      TaskDefinition: !Sub "${TaskDefinitionFamily}:${TaskDefinitionRevision}"
+      DesiredCount: 1 # Run one instance of the app
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PublicSubnet
+          SecurityGroups:
+            - !Ref FargateTaskSecurityGroup
+          AssignPublicIp: ENABLED
+      LoadBalancers:
+        - ContainerName: Main # Must match the container name in your Task Definition
+          ContainerPort: 80
+          TargetGroupArn: !Ref TargetGroup
+      # Optional: Auto-deploy when a new image is pushed to ECR
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      # Force a new deployment if the ECR image tag (latest) is updated
+      ForceNewDeployment: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Service
+
+# ==============================================================================
+# OUTPUTS
+# Provides the URL to access the application after deployment.
+# ==============================================================================
+Outputs:
+  ServiceURL:
+    Description: The public URL of the React Single Page Application (SPA).
+    Value: !GetAtt LoadBalancer.DNSName
+    Export:
+      Name: !Sub ${AWS::StackName}-ServiceURL

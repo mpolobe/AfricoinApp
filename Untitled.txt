@@ -1,0 +1,15 @@
+// Conceptual App.tsx structure
+import { FirebaseProvider } from './contexts/FirebaseContext';
+import { SmartWalletProvider } from './contexts/SmartWalletContext';
+
+function App() {
+  return (
+    <FirebaseProvider>
+      {/* SmartWalletProvider needs Firebase context to function */}
+      <SmartWalletProvider>
+        {/* ... rest of your app components */}
+      </SmartWalletProvider>
+    </FirebaseProvider>
+  );
+}
+2.  **Ensure Data Synchronization:** The `onSnapshot` listener in `SmartWalletContext.tsx` is now correctly handling real-time data synchronization. Any time you call `addTransaction` or `updateTransaction`, the local state will automatically update via the listener.

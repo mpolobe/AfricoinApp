@@ -1,0 +1,22 @@
+#Node/npm files
+
+/node_modules
+/npm-debug.log
+/package-lock.json
+
+#Development assets (should not be in final container)
+
+/.git
+/.gitignore
+/.vscode
+/dist
+/build
+/temp
+/coverage
+
+#Logs and system files
+
+.log
+npm-debug.log
+.DS_Store
+.env

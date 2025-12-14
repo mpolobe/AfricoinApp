@@ -1,0 +1,44 @@
+# --- STAGE 1: BUILDER ---
+# Using node:20-alpine for the build stage
+FROM node:20-alpine AS builder
+
+# Set working directory for the application source code
+WORKDIR /app
+
+# Copy package files first to leverage Docker cache for dependencies
+COPY package*.json ./
+
+# CRITICAL FIX: Install all necessary build tools for node-gyp and native modules.
+# - python3, make, g++: Standard node-gyp build environment.
+# - linux-headers: Required by modules like 'usb' to compile against the kernel.
+# - eudev-dev: NEW FIX. Provides the necessary 'libudev.h' header file for the 'usb' package compilation.
+RUN apk add --no-cache python3 make g++ linux-headers eudev-dev
+
+# Install dependencies
+# We are now using standard npm install, as the build tools are fully addressed.
+RUN npm install
+
+# Copy the rest of the source code
+COPY . .
+
+# Run the build command (assuming 'npm run build' generates production assets)
+RUN npm run build
+
+# --- STAGE 2: PRODUCTION (SERVING) ---
+# Using a lightweight nginx image for serving static files
+FROM nginx:stable-alpine AS production
+
+# Copy the built assets from the builder stage into the nginx html directory
+# Assuming the build output is in a 'dist' folder (standard for Vite)
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy a custom nginx configuration file (if you have one, otherwise nginx default is used)
+# If you don't have a custom config, this line can be removed or commented out:
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 80 (standard HTTP port)
+EXPOSE 80
+
+# Command to start nginx (default command for the nginx image)
+CMD ["nginx", "-g", "daemon off;"]
+

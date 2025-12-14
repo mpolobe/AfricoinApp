@@ -1,0 +1,486 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..800&family=Space+Grotesk:wght@300..700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Existing theme variables */
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221 83% 53%;
+    --radius: 0.5rem;
+    --sidebar-background: 220 23% 95%;
+    --sidebar-foreground: 215 25% 27%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 90%;
+    --sidebar-accent-foreground: 215 25% 27%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 221 83% 53%;
+
+    /* Web3 theme extensions */
+    --scroll: 210 100% 50%;       /* #0084ff */
+    --scroll-dark: 210 100% 40%;  /* #0066cc */
+    --ethereum: 226 79% 67%;      /* #627eea */
+    --solana: 267 100% 68%;       /* #9945FF */
+    --base: 221 100% 50%;         /* #0052ff */
+    --success: 142 76% 45%;       /* #10b981 */
+    --warning: 38 92% 50%;        /* #f59e0b */
+    --danger: 0 84% 60%;          /* #ef4444 */
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    --sidebar-background: 215 28% 17%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 27%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 215 25% 27%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Dark mode web3 colors */
+    --scroll: 210 100% 60%;
+    --ethereum: 226 79% 77%;
+    --solana: 267 100% 78%;
+    --base: 221 100% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+  }
+
+  pre, code, kbd, samp {
+    @apply font-mono;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-scroll-500/50 rounded-full hover:bg-scroll-500/70 transition-colors;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-scroll-500/20 text-current;
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    @apply outline-2 outline-scroll-500 outline-offset-2;
+  }
+
+  /* Remove number input spinners */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+@layer components {
+  /* Web3 Components */
+  .wallet-connect-btn {
+    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-200
+           bg-gradient-to-r from-scroll-500 to-scroll-600 hover:from-scroll-600 hover:to-scroll-700
+           text-white shadow-lg hover:shadow-xl active:scale-[0.98]
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .wallet-disconnect-btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200
+           bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
+           border border-gray-300 dark:border-gray-700
+           text-gray-700 dark:text-gray-300;
+  }
+
+  .chain-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+           bg-opacity-10 border backdrop-blur-sm;
+  }
+
+  .badge-scroll {
+    @apply bg-scroll-500/10 text-scroll-600 dark:text-scroll-400 border-scroll-500/20;
+  }
+
+  .badge-ethereum {
+    @apply bg-ethereum/10 text-ethereum dark:text-ethereum-light border-ethereum/20;
+  }
+
+  .badge-solana {
+    @apply bg-solana/10 text-solana dark:text-solana-light border-solana/20;
+  }
+
+  .badge-base {
+    @apply bg-base/10 text-base dark:text-base-light border-base/20;
+  }
+
+  /* Transaction Status */
+  .tx-status {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium;
+  }
+
+  .tx-status-pending {
+    @apply bg-yellow-500/10 text-yellow-600 dark:text-yellow-400;
+  }
+
+  .tx-status-success {
+    @apply bg-green-500/10 text-green-600 dark:text-green-400;
+  }
+
+  .tx-status-failed {
+    @apply bg-red-500/10 text-red-600 dark:text-red-400;
+  }
+
+  /* Glass Effects */
+  .glass {
+    @apply backdrop-blur-md bg-white/10 dark:bg-black/10 
+           border border-white/20 dark:border-gray-700/50
+           shadow-glass dark:shadow-glass-dark;
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl p-6 transition-all duration-300
+           hover:shadow-lg dark:hover:shadow-xl;
+  }
+
+  /* Gradient Text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r 
+           from-scroll-500 via-primary to-green-500;
+  }
+
+  .text-gradient-ethereum {
+    @apply bg-clip-text text-transparent bg-gradient-to-r 
+           from-ethereum via-purple-500 to-pink-500;
+  }
+
+  .text-gradient-solana {
+    @apply bg-clip-text text-transparent bg-gradient-to-r 
+           from-solana via-green-400 to-cyan-400;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white dark:bg-gray-900 rounded-2xl p-6 
+           border border-gray-200 dark:border-gray-800
+           shadow-card dark:shadow-card-dark
+           transition-all duration-200 hover:shadow-lg dark:hover:shadow-xl;
+  }
+
+  .card-hover {
+    @apply card hover:scale-[1.02] hover:border-scroll-500/30 
+           dark:hover:border-scroll-400/30;
+  }
+
+  /* Inputs */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border-2
+           bg-white dark:bg-gray-900
+           border-gray-300 dark:border-gray-700
+           focus:border-scroll-500 focus:ring-2 focus:ring-scroll-500/20
+           placeholder:text-gray-400 dark:placeholder:text-gray-500
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply px-4 py-2.5 rounded-lg font-medium transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-scroll-500 hover:bg-scroll-600 
+           text-white focus:ring-scroll-500;
+  }
+
+  .btn-secondary {
+    @apply btn bg-gray-100 dark:bg-gray-800 
+           hover:bg-gray-200 dark:hover:bg-gray-700
+           text-gray-800 dark:text-gray-200 
+           border border-gray-300 dark:border-gray-700;
+  }
+
+  /* Loading States */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+  }
+
+  .skeleton-circle {
+    @apply skeleton rounded-full;
+  }
+
+  .loading-spinner {
+    @apply animate-spin rounded-full border-2 
+           border-scroll-500 border-t-transparent;
+  }
+
+  /* Network Indicator */
+  .network-indicator {
+    @apply flex items-center gap-2 px-3 py-1.5 rounded-full
+           bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700;
+  }
+
+  .network-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .network-dot-connected {
+    @apply network-dot bg-green-500;
+  }
+
+  .network-dot-disconnected {
+    @apply network-dot bg-red-500;
+  }
+
+  .network-dot-pending {
+    @apply network-dot bg-yellow-500 animate-pulse;
+  }
+}
+
+@layer utilities {
+  /* Animation delays */
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+  .animation-delay-1000 { animation-delay: 1000ms; }
+
+  /* Text utilities */
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+
+  /* Scrollbar hide */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Gradient borders */
+  .gradient-border {
+    @apply relative;
+  }
+  
+  .gradient-border::before {
+    content: '';
+    @apply absolute inset-0 rounded-2xl p-[2px] -z-10
+           bg-gradient-to-r from-scroll-500 to-primary;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+  
+  .shimmer::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full
+           bg-gradient-to-r from-transparent via-white/20 to-transparent;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
+
+  /* Pulse animation for live data */
+  @keyframes pulse-subtle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Height utilities for web3 */
+  .h-wallet-modal { height: 32rem; }
+  .min-h-wallet-modal { min-height: 32rem; }
+  .max-h-wallet-modal { max-height: 32rem; }
+}
+
+/* Markdown Editor Styles (keep existing) */
+.markdown-editor {
+  @apply font-mono text-base leading-relaxed;
+}
+
+.markdown-preview {
+  @apply prose max-w-none prose-blue dark:prose-invert
+         prose-headings:font-semibold prose-p:text-gray-700 dark:prose-p:text-gray-300
+         prose-code:font-mono prose-code:text-sm;
+}
+
+.markdown-preview pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto
+         border border-gray-800;
+}
+
+.markdown-preview code:not(pre code) {
+  @apply bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md text-sm
+         text-gray-800 dark:text-gray-200;
+}
+
+/* Alchemy Account Kit Styling */
+.auth-card-container {
+  @apply w-full rounded-2xl overflow-hidden;
+}
+
+.auth-card-container > div {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: inherit !important;
+}
+
+.auth-card-container button {
+  @apply rounded-xl transition-all duration-200
+         hover:scale-[1.02] active:scale-[0.98];
+}
+
+.auth-card-container input {
+  @apply rounded-xl border-2 border-gray-300 dark:border-gray-700
+         bg-white dark:bg-gray-900
+         focus:border-scroll-500 focus:ring-2 focus:ring-scroll-500/20
+         transition-all duration-200;
+}
+
+/* Override Alchemy styles to match our theme */
+[data-akui-modal],
+[data-akui-card] {
+  --akui-primary: theme('colors.scroll.500') !important;
+  --akui-primary-hover: theme('colors.scroll.600') !important;
+  --akui-background-primary: theme('colors.white') !important;
+  --akui-background-secondary: theme('colors.gray.50') !important;
+  --akui-text-primary: theme('colors.gray.900') !important;
+  --akui-text-secondary: theme('colors.gray.600') !important;
+  --akui-border: theme('colors.gray.200') !important;
+  font-family: theme('fontFamily.sans') !important;
+  border-radius: theme('borderRadius.xl') !important;
+}
+
+[data-akui-modal].dark,
+[data-akui-card].dark {
+  --akui-background-primary: theme('colors.gray.900') !important;
+  --akui-background-secondary: theme('colors.gray.800') !important;
+  --akui-text-primary: theme('colors.gray.100') !important;
+  --akui-text-secondary: theme('colors.gray.400') !important;
+  --akui-border: theme('colors.gray.700') !important;
+}
+
+/* Wallet connection modal animations */
+.wallet-modal-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.wallet-modal-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms, transform 200ms;
+}
+
+.wallet-modal-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.wallet-modal-exit-active {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 200ms, transform 200ms;
+}
+
+/* Transaction toast animations */
+@keyframes toast-slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toast-slide-out {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+.toast-slide-in {
+  animation: toast-slide-in 0.3s ease-out;
+}
+
+.toast-slide-out {
+  animation: toast-slide-out 0.3s ease-in;
+}
+
+/* Gas fee estimator tooltip */
+.gas-tooltip {
+  @apply absolute z-50 px-3 py-2 text-sm rounded-lg shadow-lg
+         bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900
+         border border-gray-700 dark:border-gray-300;
+  animation: tooltip-fade 0.2s ease-out;
+}
+
+@keyframes tooltip-fade {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
