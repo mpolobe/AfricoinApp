@@ -1,0 +1,2 @@
+# AfricoinApp
+Africoin Cryptocurrency App
